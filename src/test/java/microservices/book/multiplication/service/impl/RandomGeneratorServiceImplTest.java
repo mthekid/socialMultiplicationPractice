@@ -1,6 +1,5 @@
 package microservices.book.multiplication.service.impl;
 
-import microservices.book.multiplication.service.impl.RandomGeneratorServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

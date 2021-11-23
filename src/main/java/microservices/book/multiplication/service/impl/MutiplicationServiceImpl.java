@@ -3,6 +3,8 @@ package microservices.book.multiplication.service.impl;
 import microservices.book.multiplication.domain.Multiplication;
 import microservices.book.multiplication.domain.MultiplicationResultAttempt;
 import microservices.book.multiplication.domain.User;
+import microservices.book.multiplication.event.EventDispatcher;
+import microservices.book.multiplication.event.MultiplicationSolvedEvent;
 import microservices.book.multiplication.repo.MultiplicationResultAttemptRepository;
 import microservices.book.multiplication.repo.UserRepository;
 import microservices.book.multiplication.service.MultiplicationService;
@@ -22,11 +24,18 @@ public class MutiplicationServiceImpl implements MultiplicationService {
     private MultiplicationResultAttemptRepository attemptRepository;
     private UserRepository userRepository;
 
+    // 이벤트
+    private EventDispatcher eventDispatcher;
+
     @Autowired
-    public MutiplicationServiceImpl(RandomGeneratorService randomGeneratorService, MultiplicationResultAttemptRepository attemptRepository, UserRepository userRepository) {
+    public MutiplicationServiceImpl(final RandomGeneratorService randomGeneratorService,
+                                    final MultiplicationResultAttemptRepository attemptRepository,
+                                    final UserRepository userRepository,
+                                    final EventDispatcher eventDispatcher) {
         this.randomGeneratorService = randomGeneratorService;
         this.attemptRepository = attemptRepository;
         this.userRepository = userRepository;
+        this.eventDispatcher = eventDispatcher;
     }
 
 
@@ -50,7 +59,7 @@ public class MutiplicationServiceImpl implements MultiplicationService {
         // 답안 채점 과정
         boolean correct =  resultAttempt.getResultAttempt() ==
                 resultAttempt.getMultiplication().getFactorA() *
-                resultAttempt.getMultiplication().getFactorB();
+                    resultAttempt.getMultiplication().getFactorB();
 
         // 복사본을 만들고 correct 필드를 상황에 맞게 설정한다.
         MultiplicationResultAttempt checkedAttempt = new MultiplicationResultAttempt(resultAttempt.getUser(),
@@ -60,6 +69,13 @@ public class MutiplicationServiceImpl implements MultiplicationService {
 
         // 실제로 답안을 저장하기.
         attemptRepository.save(checkedAttempt);
+
+        // 이벤트로 결과를 전송
+        eventDispatcher.send(new MultiplicationSolvedEvent(
+                checkedAttempt.getId(),
+                checkedAttempt.getUser().getId(),
+                checkedAttempt.isCorrect()
+        ));
 
         // 결과 반환
         return correct;
