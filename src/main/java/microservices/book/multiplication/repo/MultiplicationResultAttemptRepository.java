@@ -8,4 +8,5 @@ import java.util.List;
 public interface MultiplicationResultAttemptRepository extends JpaRepository<MultiplicationResultAttempt, Long> {
 
     List<MultiplicationResultAttempt> findTop5ByUserAliasOrderByIdDesc(String userAlias);
+    MultiplicationResultAttempt findOne(Long resultId);
 }

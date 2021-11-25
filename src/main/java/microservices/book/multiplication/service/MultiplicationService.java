@@ -22,4 +22,10 @@ public interface MultiplicationService {
     boolean checkAttempt(final MultiplicationResultAttempt resultAttempt);
     List<MultiplicationResultAttempt> getStatsForUser(String userAlias);
 
+    /**
+     * ID에 해당하는 답안을 조회한다.
+     * @param resultId 답안의 식별자
+     * @return ID에 해당하는 {@link MultiplicationResultAttempt} 객체, 없으면 null을 반환.
+     */
+    MultiplicationResultAttempt getResultById(Long resultId);
 }
